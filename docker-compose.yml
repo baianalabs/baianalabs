@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  site-baianalabs:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: site-baianalabs
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    # Caso sua VPS utilize o Nginx Proxy Manager e possua outras redes configuradas, 
+    # você pode mapear uma porta diferente (ex: "3000:80") e expor pelo Proxy Manager.
