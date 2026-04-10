@@ -1,0 +1,46 @@
+name: Node.js CI/Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: site/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./site
+      run: npm ci
+
+    - name: Build the React Application
+      working-directory: ./site
+      run: npm run build
+
+    # --- Deploy steps ---
+    # Add your specific hosting deployment commands below.
+    # Exemplo para SSH/Rsync (VPS, Hostgator, DigitalOcean):
+    # - name: Deploy to Server
+    #   uses: appleboy/scp-action@master
+    #   with:
+    #     host: ${{ secrets.HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     password: ${{ secrets.PASSWORD }}
+    #     port: ${{ secrets.PORT }}
+    #     source: "site/dist/,site/server.js,site/package.json"
+    #     target: "/var/www/baianalabs"

@@ -4,12 +4,20 @@ import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Serve static React files if in production (i.e. 'dist' folder exists)
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Configuração Supabase (Caminho pronto para integração)
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -95,6 +103,11 @@ app.post('/api/register', async (req, res) => {
     console.error('Erro no registro Supabase:', error);
     res.status(500).json({ error: 'Falha ao ativar protocolo. Verifique o banco de dados.' });
   }
+});
+
+// Fallback route for React Router (must be the last route before app.listen)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
