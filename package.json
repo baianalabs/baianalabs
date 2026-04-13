@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "site/server.js",
   "scripts": {
     "postinstall": "cd site && npm install && npm run build",
     "start": "node site/server.js",
