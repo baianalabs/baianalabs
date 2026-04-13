@@ -20,9 +20,18 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // Configuração Supabase (Caminho pronto para integração)
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+let supabase = null;
+try {
+  if (supabaseUrl && supabaseAnonKey) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  } else {
+    console.warn('⚠️ Supabase config is missing. Database features will not work.');
+  }
+} catch (error) {
+  console.error('Failed to initialize Supabase:', error);
+}
 
 const PORT = process.env.PORT || 3001;
 
