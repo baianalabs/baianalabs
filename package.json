@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "cd site && npm install && npm run build",
-    "start": "cd site && npm start",
+    "start": "node site/server.js",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
