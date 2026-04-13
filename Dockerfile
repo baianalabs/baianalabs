@@ -1,45 +1,30 @@
-# Stage 1: Build the Vite + React application
-FROM node:20-alpine as build
+# Build and Serve the Node.js + React (Vite) application
+FROM node:20-alpine
 
-# Definir o diretório de trabalho
+# Set working directory
 WORKDIR /app
 
-# Copiar os arquivos de manifesto para aproveitar o cache do Docker
-COPY package*.json ./
+# Copy the package files from the 'site' directory
+COPY site/package*.json ./
 
-# Instalar as dependências do projeto
+# Install dependencies
 RUN npm ci
 
-# Copiar o restante do código fonte
-COPY . .
+# Copy the rest of the site files
+COPY site/ ./
 
-# Fazer o build do projeto (gera os arquivos estáticos na pasta dist)
+# Build the React application (generates /app/dist)
 RUN npm run build
 
-# Stage 2: Servir a aplicação usando o Nginx
-FROM nginx:alpine
+# Change ownership to the node user for security
+RUN chown -R node:node /app
 
-# Remover a página padrão do Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Use the non-root 'node' user
+USER node
 
-# Copiar os arquivos gerados no Stage 1 para o diretório público do Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+# Expose the port the app runs on
+EXPOSE 3001
 
-# Precisamos copiar uma configuração customizada do nginx se o app usar roteamento client-side (React Router)
-# Para um site simples, a configuração padrão do Nginx costuma funcionar. 
-# Adicionando regra para fallback no index.html (SPA)
-RUN echo -e "server {\n\
-    listen 80;\n\
-    server_name localhost;\n\
-    location / {\n\
-        root   /usr/share/nginx/html;\n\
-        index  index.html index.htm;\n\
-        try_files \$uri \$uri/ /index.html;\n\
-    }\n\
-}" > /etc/nginx/conf.d/default.conf
+# Start the Express server
+CMD ["npm", "start"]
 
-# Expor a porta 80 do container
-EXPOSE 80
-
-# Iniciar o servidor Nginx
-CMD ["nginx", "-g", "daemon off;"]
