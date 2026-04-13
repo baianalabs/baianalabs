@@ -1,0 +1,22 @@
+name: Deploy to Easypanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Easypanel Auto Deploy Webhook
+        run: |
+          # A URL do webhook do Easypanel é fornecida nas configurações do seu projeto/serviço no painel (aba "Deploy > Webhook").
+          # Crie um secret chamado EASYPANEL_WEBHOOK_URL no Github (Settings > Secrets and variables > Actions)
+          if [ -z "${{ secrets.EASYPANEL_WEBHOOK_URL }}" ]; then
+            echo "EASYPANEL_WEBHOOK_URL não configurado. Por favor, adicione o secret no GitHub."
+            exit 1
+          fi
+          echo "Disparando deploy no Easypanel..."
+          curl -X POST -k "${{ secrets.EASYPANEL_WEBHOOK_URL }}"
+        
